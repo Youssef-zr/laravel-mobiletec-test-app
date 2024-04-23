@@ -31,10 +31,15 @@ class Category extends Model
         return $this->hasMany(Category::class, 'parent_id');
     }
 
+    /**
+     * Get all of the childrens recursive for the Category
+     *
+     */
     public function childrenRecursive()
     {
         return $this->children()->with('childrenRecursive');
     }
+
     /**
      * Get all of the news for the Category
      *

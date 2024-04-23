@@ -30,17 +30,10 @@ class NewsController extends Controller
     public function store(StoreNewsRequest $request)
     {
         $news = new News();
-        $news->titre = $request->titre;
-        $news->contenu = $request->contenu;
-        $news->categorie = $request->categorie;
-        $news->date_debut = $request->date_debut;
-        $news->date_expiration = $request->date_expiration;
-        $news->save();
+        $data = $request->validated();
+        $news->create($data);
 
-        return response()->json([
-            'msg' => 'created successfully',
-            'news' => $news
-        ], 201);
+        return response()->json(['msg' => 'created successfully','news' => $news], 201);
     }
 
     /**
@@ -52,6 +45,7 @@ class NewsController extends Controller
 
             $news = News::findOrFail($id);
             return response()->json(['news' => $news, 200]);
+
         } catch (Exception $e) {
 
             return response()->json(['error' => $e->getMessage()], 404);
@@ -65,18 +59,13 @@ class NewsController extends Controller
     public function update(UpdateNewsRequest $request, $id)
     {
         try {
-            $news = News::findOrFail($id);
-            $news->titre = $request->titre;
-            $news->contenu = $request->contenu;
-            $news->categorie = $request->categorie;
-            $news->date_debut = $request->date_debut;
-            $news->date_expiration = $request->date_expiration;
-            $news->save();
 
-            return response()->json([
-                'msg' => 'updated successfully',
-                'news' => $news
-            ], 201);
+            $news = News::findOrFail($id);
+            $data = $request->validated();
+            $news->update($data);
+
+            return response()->json(['msg' => 'updated successfully','news' => $news], 201);
+
         } catch (Exception $e) {
 
             return response()->json(['error' => $e->getMessage()], 404);
@@ -93,10 +82,8 @@ class NewsController extends Controller
             $news = News::findOrFail($id);
             $news->delete();
 
-            return response()->json([
-                'msg' => 'deleted successfully',
-                'news' => null
-            ], 204);
+            return response()->json(['msg' => 'deleted successfully','news' => null], 204);
+
         } catch (Exception $e) {
 
             return response()->json(['error' => $e->getMessage()], 404);

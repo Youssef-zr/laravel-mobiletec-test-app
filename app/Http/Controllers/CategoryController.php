@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use Carbon\Carbon;
+use Exception;
 
 class CategoryController extends Controller
 {
@@ -25,29 +25,19 @@ class CategoryController extends Controller
             ->with('news')
             ->first();
 
-        if ($category == null) {
-            return response()->json(
-                ['msg' => 'record not foud'],
-                403
-            );
-        }
+            try {
 
-        $news = collect(); // Initialize an empty collection
+                $news = $this->collectData($category,true);
+                return $news->isEmpty()
+                    ? response()->json(['msg' => 'No news found for the specified category.'], 404)
+                    : response()->json(["news" => $news], 200);
 
-        // Call the recursive function to retrieve the news
-        $this->getNewsRecursively($category, $news, true);
+            } catch (Exception $e) {
 
-        if ($news->isEmpty()) {
-            return response()->json(
-                [
-                    'msg' => 'No news found for the specified category.'
-                ],
-                404
-            );
-        } else {
-            return response()->json(["news" => $news], 200);
-        }
+                return response()->json(['error' => $e->getMessage()], 404);
+            }
     }
+
 
     // get category by name and recursive active news
     public function searchRecursiveNews($categoryName)
@@ -57,44 +47,37 @@ class CategoryController extends Controller
             ->with('notExpiredNews')
             ->first();
 
-        if ($category == null) {
-            return response()->json(
-                ['msg' => 'record not foud'],
-                403
-            );
-        }
+        try {
 
+            $news = $this->collectData($category);
+            return $news->isEmpty()
+                ? response()->json(['msg' => 'No news found for the specified category.'], 404)
+                : response()->json(["news" => $news], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 404);
+        }
+    }
+
+    public function collectData($category, $expired = false)
+    {
         $news = collect(); // Initialize an empty collection
+        $this->getNewsRecursively($category, $news,  $expired); // Call the recursive function to retrieve the news
 
-        // Call the recursive function to retrieve the news
-        $this->getNewsRecursively($category, $news);
-
-        if ($news->isEmpty()) {
-            return response()->json(
-                [
-                    'msg' => 'No news found for the specified category.'
-                ],
-                404
-            );
-        } else {
-            return response()->json(["news" => $news], 200);
-        }
+        return $news;
     }
 
     // Iterate through the news of the category
     public function getNewsRecursively($category, &$news, $expired = false)
     {
 
-        $categoryNews = $expired ? $category->news : $category->notExpiredNews;
-
-        // Retrieve the news associated with the current category
-        $news = $news->merge($categoryNews);
+        $categoryNews = $expired ? $category->news : $category->notExpiredNews; // check need expired news
+        $news = $news->merge($categoryNews); // Retrieve the news associated with the current category
 
         // Iterate through the subcategories of the current category
         foreach ($category->children as $childCategory) {
-
-            // Recursion for each subcategory
-            $this->getNewsRecursively($childCategory, $news);
+            $this->getNewsRecursively($childCategory, $news); // Recursion for each subcategory
         }
     }
 }
