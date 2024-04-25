@@ -7,7 +7,6 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-use function PHPSTORM_META\elementType;
 
 class CategoryTableSeeder extends Seeder
 {
@@ -16,6 +15,7 @@ class CategoryTableSeeder extends Seeder
      */
     public function run(): void
     {
+
         //array of categories / subCategories / childCategories
         $categories = [
             'Actualités' => [

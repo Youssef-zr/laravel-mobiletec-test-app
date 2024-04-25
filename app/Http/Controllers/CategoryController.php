@@ -25,17 +25,16 @@ class CategoryController extends Controller
             ->with('news')
             ->first();
 
-            try {
+        try {
 
-                $news = $this->collectData($category,true);
-                return $news->isEmpty()
-                    ? response()->json(['msg' => 'No news found for the specified category.'], 404)
-                    : response()->json(["news" => $news], 200);
+            $news = $this->collectData($category, true);
+            return $news->isEmpty()
+                ? response()->json(['msg' => 'No news found for the specified category.'], 404)
+                : response()->json(["news" => $news], 200);
+        } catch (Exception $e) {
 
-            } catch (Exception $e) {
-
-                return response()->json(['error' => $e->getMessage()], 404);
-            }
+            return response()->json(['error' => $e->getMessage()], 404);
+        }
     }
 
 
@@ -51,9 +50,8 @@ class CategoryController extends Controller
 
             $news = $this->collectData($category);
             return $news->isEmpty()
-                ? response()->json(['msg' => 'No news found for the specified category.'], 404)
+                ? response()->json(['msg' => 'No news found for the specified category.'], 200)
                 : response()->json(["news" => $news], 200);
-
         } catch (Exception $e) {
 
             return response()->json(['error' => $e->getMessage()], 404);
@@ -63,7 +61,7 @@ class CategoryController extends Controller
     public function collectData($category, $expired = false)
     {
         $news = collect(); // Initialize an empty collection
-        $this->getNewsRecursively($category, $news,  $expired); // Call the recursive function to retrieve the news
+        $this->getNewsRecursively($category, $news, $expired); // Call the recursive function to retrieve the news
 
         return $news;
     }
@@ -73,11 +71,16 @@ class CategoryController extends Controller
     {
 
         $categoryNews = $expired ? $category->news : $category->notExpiredNews; // check need expired news
-        $news = $news->merge($categoryNews); // Retrieve the news associated with the current category
+
+        if($category->news->count()>0){
+            $news = $news->merge($categoryNews); // Retrieve the news associated with the current category
+        }
 
         // Iterate through the subcategories of the current category
-        foreach ($category->children as $childCategory) {
-            $this->getNewsRecursively($childCategory, $news); // Recursion for each subcategory
+        if ($category->children->count() > 0) {
+            foreach ($category->children as $childCategory) {
+                $this->getNewsRecursively($childCategory, $news); // Recursion for each subcategory
+            }
         }
     }
 }

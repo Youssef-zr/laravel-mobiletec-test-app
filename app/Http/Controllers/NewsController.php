@@ -10,14 +10,16 @@ use Exception;
 
 class NewsController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $news = News::orderBy('date_debut', 'desc')
-            ->distinct()->with('category')
+            ->distinct()
             ->where('date_expiration', '>', Carbon::now())
+            ->with('category')
             ->get();
 
         return response()->json(['news' => $news], 200);
@@ -31,9 +33,9 @@ class NewsController extends Controller
     {
         $news = new News();
         $data = $request->validated();
-        $news->create($data);
+        $news->fill($data)->save();
 
-        return response()->json(['msg' => 'created successfully','news' => $news], 201);
+        return response()->json(['msg' => 'created successfully', 'news' => $news], 201);
     }
 
     /**
@@ -44,8 +46,7 @@ class NewsController extends Controller
         try {
 
             $news = News::findOrFail($id);
-            return response()->json(['news' => $news, 200]);
-
+            return response()->json(['news' => $news], 200);
         } catch (Exception $e) {
 
             return response()->json(['error' => $e->getMessage()], 404);
@@ -64,8 +65,7 @@ class NewsController extends Controller
             $data = $request->validated();
             $news->update($data);
 
-            return response()->json(['msg' => 'updated successfully','news' => $news], 201);
-
+            return response()->json(['msg' => 'updated successfully', 'news' => $news], 200);
         } catch (Exception $e) {
 
             return response()->json(['error' => $e->getMessage()], 404);
@@ -82,8 +82,7 @@ class NewsController extends Controller
             $news = News::findOrFail($id);
             $news->delete();
 
-            return response()->json(['msg' => 'deleted successfully','news' => null], 204);
-
+            return response()->json(['msg' => 'deleted successfully'], 200);
         } catch (Exception $e) {
 
             return response()->json(['error' => $e->getMessage()], 404);

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('titre');
             $table->text('contenu');
-            $table->string('categorie');
+            $table->integer('categorie');
             $table->datetime('date_debut');
             $table->datetime('date_expiration');
             $table->timestamps();

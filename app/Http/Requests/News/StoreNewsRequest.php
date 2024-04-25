@@ -32,7 +32,6 @@ class StoreNewsRequest extends FormRequest
 
     public function attributes()
     {
-
         return [
             'titre' => 'title',
             'contenu' => 'content',

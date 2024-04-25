@@ -23,7 +23,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     // category routes
     Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
-        Route::get('/all', [CategoryController::class, 'index'])->name('.index');
+        Route::get('/all', [CategoryController::class, 'index'])->name('index');
         Route::get('/{id}/news', [CategoryController::class, 'retriveCategoryNews'])->name('retrive.news');
         Route::get('/search/{name}/news', [CategoryController::class, 'searchRecursiveNews'])->name('search.news');
     });
